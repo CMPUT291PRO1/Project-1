@@ -1,6 +1,7 @@
 import sys
 import cx_Oracle
 import getpass
+import P3
 
 # for testing---------------------------------------------
 #def AutoTransaction():
@@ -24,7 +25,6 @@ def AutoTransaction(conString):
 	
 	ongoing = True
 	while(ongoing):
-		ongoing = False
 		print("===========================================================")
 		print("Make a new auto transaction, enter 'N'.\n ")
             
@@ -35,58 +35,102 @@ def AutoTransaction(conString):
 			curs=con.cursor();	
 		
 			# check if the vehicle exists
-			vehicle_id = input("\nPlease enter vehicle id:")
-			curs.execute("SELECT serial_no FROM vehicle WHERE serial_no = '{}'".format(vehicle_id))
-			try:	
-				curs.fetchone()
-			except:
-				print("Vehicle Not Registered")
+			checking = True
+			while(checking):
+				checking = False
+				vehicle_id = input("\nPlease enter vehicle id:")
+				try:
+					val = str(vehicle_id)
+				except ValueError:
+					print("Invalid Input Type. Try Again.")
+				curs.execute("SELECT serial_no FROM vehicle WHERE serial_no = '{}'".format(vehicle_id))
+				if not curs.fetchone():
+					print("Vehicle Not Registered")
+					checking = True
 				
-			seller_id = input("Seller_id:") 
-			# check if the seller exists
-			curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(seller_id)  )
-			try:
-				curs.fetchone()
-			except:	
-				print("Seller not registered.")		
+			checking = True
+			while(checking):		
+				checking = False		
+				seller_id = input("Seller_id:") 
+				# check if the seller exists
+				curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(seller_id)  )
+				if not curs.fetchone():
+					print("Seller not registered.")		
 							
-			# check if the seller owns the vehicle
-			curs.execute("SELECT vehicle_id FROM owner WHERE owner_id = '{}'".format(seller_id))
-			vehicles = []
-			row = curs.fetchone()
-			while row:
-				vehicles.append(row[0].strip())
+				# check if the seller owns the vehicle
+				curs.execute("SELECT vehicle_id FROM owner WHERE owner_id = '{}'".format(seller_id))
+				vehicles = []
 				row = curs.fetchone()
-			#print(vehicles)
-			if not vehicle_id in vehicles:
-				print("This seller does not own car '{}'".format(vehicle_id))
-				break
-			
-			buyer_id = [] # in case there are more buyers
-			buyer_id.append(input("Buyer_id:") )
-			# check if the buyer_id exists
-			if not curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(seller_id)):
-				print("Buyer not registered.")
-				ch = input("Would you like to register a new buyer? y/n \n")
-				if ch == 'n':
-					print("Going back to main menu...")
-				if ch == 'y':
-					# register a new person into people database
-					P3.regPerson(conString, curs)
+				while row:
+					vehicles.append(row[0].strip())
+					row = curs.fetchone()
+				#print(vehicles)
+				if not vehicle_id in vehicles:
+					print("This seller does not own car '{}'\n".format(vehicle_id))
+					checking = True
+				
+			checking = True
+			all_owners = []
+			while(checking):
+				checking = False
+				buyer_id = [] # in case there are more buyers
+				buyer_id.append(input("Buyer_id:") )
+				# check if the buyer_id exists
+				curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(buyer_id[0]))
+				if not curs.fetchone():
+					print("Buyer not registered.")
+					ch = input("Would you like to register a new buyer? y/n \n")
+					if ch == 'y':
+						# register a new person into people database
+						P3.regPerson(conString, curs)
+					if ch == 'n':
+						print("See you next time!")
+						return
+				# check if the buyer is an owner
+				curs.execute("SELECT owner_id FROM owner WHERE vehicle_id = '{}'".format(vehicle_id))
+				owners = []
+				row = curs.fetchone()
+				while row:
+					owners.append(row[0].strip())
+					row = curs.fetchone()	
+				if buyer_id[0] in owners:
+					print("Buyer owns car {}, enter buyer ID again.".format(vehicle_id))
+					checking = True		
+				else: all_owners = owners
 				
 				
             # check if this buyer is the primary owner
-			is_primary = input("Is this a primary owner? y/n\n")			
-			if is_primary == 'n':
+			is_primary = input("Are there any secondary owners? y/n\n")
+		
+			if is_primary == 'y':
 				num = input("How many other owners? Enter the number:")
 				for i in range(int(num)):
-					buyer_id.append( input("Buyer_id:"))
+					checking = True
+					while(checking):
+						checking = False
+						bid = input("Buyer_id:")
+						if bid in all_owners:
+							print("Buyer owns car {}, enter buyer ID again.".format(vehicle_id))
+							checking = True
+						if bid == buyer_id[0]:
+							print("Invalid secondary buyer ID. Enter again.")
+							checking = True
+						curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(bid))
+						if not curs.fetchone():
+							print("Buyer not registered.")
+							checking = True
+						else:
+							buyer_id.append(bid)
+
                     
 			# obtain date and price
 			s_date = "'"+input("Sale Date:(YYYY-MM-DD)")+"'"
-			price = input("Price:")
+			try:
+				price = float(input("Price:"))
+			except ValueError:	
+				print("Invalid Data type. Try Again.")
 			
-			# obtain the largest transaction_id			
+			# obtain the largest transaction_id			`
 			curs.execute("SELECT MAX(transaction_id) FROM auto_sale")			
 			largest = curs.fetchone()
 			transaction_id = int(largest[0]) + 1
@@ -94,11 +138,13 @@ def AutoTransaction(conString):
             # add informatio to table auto_sale
 			#curs.bindarraysize = 1
 			#curs.setinputsizes(int, 15, 15, 15, date, float)
+
 			statement = "INSERT INTO auto_sale VALUES ({}, {}, {}, {}, TO_DATE({},'YYYY-MM-DD'), {})"\
 						.format(transaction_id, seller_id, buyer_id[0], vehicle_id, s_date, price) 
 			curs.execute(statement)
 			
 			# add information to the new owner
+			# I assumed that the first buyer id entered to be primary owner
 			for i in range(len(buyer_id)):
 				if i == 0:
 					add = "INSERT INTO owner VALUES ('{}', '{}', '{}')"\
@@ -109,28 +155,20 @@ def AutoTransaction(conString):
 				curs.execute(add)
 
             # remove from old one
-			curs.execute("DELETE FROM owner WHERE vehicle_id = '{}'".format(seller_id) )
+			curs.execute("DELETE FROM owner WHERE owner_id = '{}'".format(seller_id) )
 			
 			c = input("Would you like another transaction? y/n\n")
 			if c == 'n':
                 # close database connection
 				con.commit()
 				curs.close()
-				return
-
-		ongoing  = True
+				ongoing = False
+			else:
+				ongoing  = True
 				
 			
 # for testing
 #if __name__ == "__main__":
 #	while(1):
 #		AutoTransaction()		
-	
-		
-		
-	
-
-    
-    
-	
 	
