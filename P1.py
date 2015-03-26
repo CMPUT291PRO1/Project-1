@@ -6,15 +6,29 @@ con = None
 
 def regV(conString):
     
-    serialNo = input("Enter serial number: ").lower()
-    maker = input("Enter Maker: ").lower()
-    typeId =  input("Type ID#: ").lower()
-    model = input("Enter Model: ").lower()
-    year = input("Enter Year: ").lower()
-    color = input("Enter color: ").lower()
-    pOwner = None
-    secondaryOwner = []
-    primaryOwner = []
+    verify = False
+    while(not verify):
+        serialNo = input("Enter serial number: ").lower()
+        maker = input("Enter Maker: ").lower()
+        typeId =  input("Type ID#: ").lower()
+        model = input("Enter Model: ").lower()
+        year = input("Enter Year: ").lower()
+        color = input("Enter color: ").lower()
+        pOwner = None
+        secondaryOwner = []
+        primaryOwner = []
+        
+        verify = serialNo.isalnum() and maker.isalpha() and typeId.isdigit() and model.isalnum() and year.isdigit() and color.isalpha()
+        if(not verify):
+            
+            print("\nError in entry, please ensure all data is correct")
+            print("Serial: "+serialNo+" "+ str(serialNo.isalnum()))
+            print("Maker: "+maker + " " + str(maker.isalpha()))
+            print("Type ID#: "+ typeId + " " + str(typeId.isdigit()))
+            print(" Model: " + model+ " " + str(model.isalnum()))
+            print(" Year: " + year + " "+ str(year.isdigit()))
+            print("Color: " + color+" " + str(color.isalpha()) +"\n")
+            
     
     con = cx_Oracle.connect(conString);
     curs = con.cursor();
