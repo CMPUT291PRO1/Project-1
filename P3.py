@@ -39,26 +39,30 @@ def DriverLiRegis(conString):
 			l_num = int(largest[0]) + 1 
 			print("Your licence number is: {}".format(l_num))
 			
-			sin = input("Please enter your SIN:")
-			curs.execute("SELECT sin FROM people where sin = '{}'".format(sin))
-			# check if the person exists in people
-			if not curs.fetchone():
-				print("Person does not exist.")
-				# if the person does not exist
-				# ask user if to add new one or not
-				ch = input("Would you like to register a new buyer? y/n \n")
-				if ch == 'n':
-					print("Going back to main menu...")
-				if ch == 'y':
-					# register a new person into people database
-					regPerson(conString, curs)
+			checking = True
+			while(checking):
+				checking = False
+				sin = input("Please enter your SIN:")
+				curs.execute("SELECT sin FROM people where sin = '{}'".format(sin))
+				# check if the person exists in people
+				if not curs.fetchone():
+					print("Person does not exist.")
+					# if the person does not exist
+					# ask user if to add new one or not
+					ch = input("Would you like to register a new buyer? y/n \n")
+					if ch == 'y':
+						# register a new person into people database
+						regPerson(conString, curs)
+					if ch == 'n':
+						print("See you next time!")
+						return
 				
-			# check if the driver has already got a licence
-			# if so, raise error value
-			curs.execute("SELECT sin FROM drive_licence WHERE sin = '{}'".format(sin))
-			if curs.fetchone():
-				print("Driver already registered.")
-				return
+				# check if the driver has already got a licence
+				# if so, raise error value
+				curs.execute("SELECT sin FROM drive_licence WHERE sin = '{}'".format(sin))
+				if curs.fetchone():
+					print("Driver already registered.")
+					checking = True
 				
 			l_class = input("Please enter the licence class:")
 			
@@ -75,13 +79,9 @@ def DriverLiRegis(conString):
 			e_year = int(time.strftime("%Y"))+5
 			expiring_date = str(e_year) +'-'+time.strftime("%m-%d")
 			
-			# insert info into database
-			curs.setinputsizes(photo=cx_Oracle.BLOB)
-			
-			state ="INSERT INTO drive_licence VALUES('{}', '{}', '{}', {}, to_date('{}', 'YYYY-MM-DD'), to_date('{}', 'YYYY-MM-DD'))"\
-						.format(l_num, sin, l_class, photo, issuing_date, expiring_date)
-			print(state)
-			curs.execute(state)
+			state ="INSERT INTO drive_licence VALUES(:licence_no, :sin, :class, :photo, to_date(:issuing_date, 'YYYY-MM-DD'), to_date(:expiring_date,'YYYY-MM-DD'))"			
+			curs.execute(state, {'licence_no':l_num, 'sin':sin, 'class':l_class, 'photo':photo, 'issuing_date':issuing_date, 'expiring_date':expiring_date})
+
 			
 			c = input("Would you like another registration? y/n\n")
 			if c == 'n':
