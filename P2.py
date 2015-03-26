@@ -124,42 +124,43 @@ def AutoTransaction(conString):
 
                     
 			# obtain date and price
-			s_date = "'"+input("Sale Date:(YYYY-MM-DD)")+"'"
-			try:
-				price = float(input("Price:"))
-			except ValueError:	
-				print("Invalid Data type. Try Again.")
-				
-			if not transaction_id or not seller_id or not buyer_id[0] or not vehicle_id or not s_date or not price:
-				print("\nAt least one of the value is none. Try again.")
+			s_date = "'"+input("Sale Date:(YYYY-MM-DD )")+"'"
+			checking = True
+			while(checking):
+				checking = False
+				try:		
+					price = input("Price:")
+				except ValueError:
+					print("Invalid input!")
+					checking = True
+									
+		
+			# obtain the largest transaction_id			`
+			curs.execute("SELECT MAX(transaction_id) FROM auto_sale")			
+			largest = curs.fetchone()
+			transaction_id = int(largest[0]) + 1
 			
-			else:
-				# obtain the largest transaction_id			`
-				curs.execute("SELECT MAX(transaction_id) FROM auto_sale")			
-				largest = curs.fetchone()
-				transaction_id = int(largest[0]) + 1
-				
-	            # add informatio to table auto_sale
-				#curs.bindarraysize = 1
-				#curs.setinputsizes(int, 15, 15, 15, date, float)
-	
-				statement = "INSERT INTO auto_sale VALUES ({}, {}, {}, {}, TO_DATE({},'YYYY-MM-DD'), {})"\
-							.format(transaction_id, seller_id, buyer_id[0], vehicle_id, s_date, price) 
-				curs.execute(statement)
-				
-				# add information to the new owner
-				# I assumed that the first buyer id entered to be primary owner
-				for i in range(len(buyer_id)):
-					if i == 0:
-						add = "INSERT INTO owner VALUES ('{}', '{}', '{}')"\
-							.format(buyer_id[i], vehicle_id, 'y')
-					else:
-						add = "INSERT INTO owner VALUES ('{}', '{}', '{}')"\
-							.format(buyer_id[i], vehicle_id, 'n')  
-					curs.execute(add)
-	
-	            # remove from old one
-				curs.execute("DELETE FROM owner WHERE owner_id = '{}'".format(seller_id) )
+            # add informatio to table auto_sale
+			#curs.bindarraysize = 1
+			#curs.setinputsizes(int, 15, 15, 15, date, float)
+
+			statement = "INSERT INTO auto_sale VALUES ({}, {}, {}, {}, TO_DATE({},'YYYY-MM-DD'), {})"\
+						.format(transaction_id, seller_id, buyer_id[0], vehicle_id, s_date, price) 
+			curs.execute(statement)
+			
+			# add information to the new owner
+			# I assumed that the first buyer id entered to be primary owner
+			for i in range(len(buyer_id)):
+				if i == 0:
+					add = "INSERT INTO owner VALUES ('{}', '{}', '{}')"\
+						.format(buyer_id[i], vehicle_id, 'y')
+				else:
+					add = "INSERT INTO owner VALUES ('{}', '{}', '{}')"\
+						.format(buyer_id[i], vehicle_id, 'n')  
+				curs.execute(add)
+
+            # remove from old one
+			curs.execute("DELETE FROM owner WHERE owner_id = '{}'".format(seller_id) )
 			
 			c = input("Would you like another transaction? y/n\n")
 			if c == 'n':
