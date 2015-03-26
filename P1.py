@@ -56,6 +56,7 @@ def regV(conString):
             curs.execute(statement)
         except:
             print("Sql error, try again.")
+            return
         
         for x in primaryOwner:
             print("PRIMARY: ")
@@ -65,7 +66,7 @@ def regV(conString):
                 curs.execute(statement2)
             except:
                 print("Sql error, try again.")
-                break
+                return
         
         for x in secondaryOwner:
             print("SECONDARY: ")
@@ -76,6 +77,7 @@ def regV(conString):
             except:
                 print("Sql error, try again.")
                 break
+                return
             
     con.commit()
     curs.close()
