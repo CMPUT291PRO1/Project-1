@@ -102,16 +102,36 @@ def DriverLiRegis(conString):
 def regPerson(conString, curs):
 	run =True
 	while(run):
+		
+		
 		#sin, name, height,weight,eyecolor, haircolor,addr,gender,birthday
-		sin = input("Enter sin number: ").lower()
-		name = input("Enter Name: ").lower()
-		height =  input("Height: ").lower()
-		weight = input("Weight :").lower()
-		eyeColor = input("Eye Colour: ").lower()
-		hairColor = input("Hair Colour: ").lower()
-		addr = input("Address: ").lower()
-		gender = input("Gender (m/f): ").lower()
-		birthday = input("Birthdate (YYYY-MM-DD): ")
+		
+		
+		verify = False
+		while(not verify):
+			sin = input("Enter sin number: ").lower()
+			name = input("Enter Name: ").lower()
+			height =  input("Height: ").lower()
+			weight = input("Weight :").lower()
+			eyeColor = input("Eye Colour: ").lower()
+			hairColor = input("Hair Colour: ").lower()
+			addr = input("Address: ").lower()
+			gender = input("Gender (m/f): ").lower()
+			birthday = input("Birthdate (YYYY-MM-DD): ")
+	        
+			verify = (sin.isalnum() and name.isalpha() and height.isdigit() and weight.isdigit() and eyeColor.isalpha() and hairColor.isalpha() and addr.isalnum() and (gender == 'm' or gender =='f'))      
+			
+			if(not verify):
+				print("\nError in entry, please ensure all data is correct")
+				print("Sin #: "+sin+" "+ str(sin.isalnum()))
+				print("Name: "+name + " " + str(name.isalpha()))
+				print("Height#: "+ hieght + " " + str(height.isdigit()))
+				print(" Weight: " + weight+ " " + str(weight.isdigit()))
+				print(" Eye Color: " +eyeColor + " "+ str(eyeColor.isalpha()))
+				print("Hair Color: " + hairColor+" " + str(hairColor.isalpha()))
+				print("Address: " + addr + str(addr.isalnum()))
+				print("Gender: " + gender + str(gender == 'm' or gender =='f'))
+				print("Birthday: " + birthday + "\n")
 	
 		statement = "insert into people values('"+sin+"','"+name+"',"+height+","+weight+", '"+eyeColor+"', '"+hairColor+"', '"+addr+"','"+gender+"',to_date('"+birthday+"','YYYY-MM-DD') )"
 		try:
