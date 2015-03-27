@@ -90,7 +90,6 @@ def search_engine(conString):
             sqlcode = search_option2()
             curs.execute(sqlcode)
             rows = curs.fetchall()
-            print(rows)
             if len(rows) == 0:
                 print("No matches. Please try again")
             else:
