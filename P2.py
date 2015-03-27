@@ -2,6 +2,7 @@ import sys
 import cx_Oracle
 import getpass
 import P3
+import string
 
 # for testing---------------------------------------------
 #def AutoTransaction():
@@ -43,7 +44,7 @@ def AutoTransaction(conString):
 					val = str(vehicle_id)
 				except ValueError:
 					print("Invalid Input Type. Try Again.")
-				curs.execute("SELECT serial_no FROM vehicle WHERE serial_no = '{}'".format(vehicle_id))
+				curs.execute("SELECT serial_no FROM vehicle WHERE lower(serial_no) = '{}'".format(str.lower(vehicle_id)))
 				if not curs.fetchone():
 					print("Vehicle Not Registered")
 					checking = True
@@ -53,12 +54,12 @@ def AutoTransaction(conString):
 				checking = False		
 				seller_id = input("Seller_id:") 
 				# check if the seller exists
-				curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(seller_id)  )
+				curs.execute("SELECT sin FROM people WHERE lower(sin) = '{}'".format(str.lower(seller_id))  )
 				if not curs.fetchone():
 					print("Seller not registered.")		
 							
 				# check if the seller owns the vehicle
-				curs.execute("SELECT vehicle_id FROM owner WHERE owner_id = '{}'".format(seller_id))
+				curs.execute("SELECT vehicle_id FROM owner WHERE lower(owner_id) = '{}'".format(str.lower(seller_id)))
 				vehicles = []
 				row = curs.fetchone()
 				while row:
@@ -76,7 +77,7 @@ def AutoTransaction(conString):
 				buyer_id = [] # in case there are more buyers
 				buyer_id.append(input("Buyer_id:") )
 				# check if the buyer_id exists
-				curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(buyer_id[0]))
+				curs.execute("SELECT sin FROM people WHERE lower(sin) = '{}'".format(str.lower(buyer_id[0])))
 				if not curs.fetchone():
 					print("Buyer not registered.")
 					ch = input("Would you like to register a new buyer? y/n \n")
@@ -87,7 +88,7 @@ def AutoTransaction(conString):
 						print("See you next time!")
 						return
 				# check if the buyer is an owner
-				curs.execute("SELECT owner_id FROM owner WHERE vehicle_id = '{}'".format(vehicle_id))
+				curs.execute("SELECT owner_id FROM owner WHERE lower(vehicle_id) = '{}'".format(str.lower(vehicle_id)))
 				owners = []
 				row = curs.fetchone()
 				while row:
@@ -115,7 +116,7 @@ def AutoTransaction(conString):
 						if bid == buyer_id[0]:
 							print("Invalid secondary buyer ID. Enter again.")
 							checking = True
-						curs.execute("SELECT sin FROM people WHERE sin = '{}'".format(bid))
+						curs.execute("SELECT sin FROM people WHERE lower(sin) = '{}'".format(str.lower(bid)))
 						if not curs.fetchone():
 							print("Buyer not registered.")
 							checking = True
@@ -160,7 +161,7 @@ def AutoTransaction(conString):
 				curs.execute(add)
 
             # remove from old one
-			curs.execute("DELETE FROM owner WHERE owner_id = '{}'".format(seller_id) )
+			curs.execute("DELETE FROM owner WHERE lower(owner_id) = '{}'".format(str.lower(seller_id)) )
 			
 			c = input("Would you like another transaction? y/n\n")
 			if c == 'n':
