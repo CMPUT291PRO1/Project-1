@@ -1,6 +1,7 @@
 import sys
 import cx_Oracle
 import P1
+import P3
 
 
 def violation(conString):
@@ -45,9 +46,9 @@ def record(conString,curs):
                         P1.regV(conString)                 
                 violator_no = input("Enter violator :")
                 exist1 = P1.searchSin(violator_no, curs)
-                if not exist:
+                if not exist1:
                         print("The person is not registered. Please register first")
-                        P1.regPerson(conString)                     
+                        P3.regPerson(conString,curs,violator_no)                     
                 office_no = input("Enter officer ID :")
                 vtype = input("Enter violation type:")
                 vdate = input("Enter violation date (DD-Month-YY):")

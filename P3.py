@@ -51,25 +51,25 @@ def DriverLiRegis(conString):
 			while(checking):
 				checking = False
 				sin = input("Please enter your SIN:")
-				if sin.isalnum() or sin.isalalpha():
-					checking = True
-				curs.execute("SELECT sin FROM people where sin = {}".format(sin))
+				#if sin.isalnum() or sin.isalalpha():
+				#	checking = True
+				curs.execute("SELECT sin FROM people where sin = '{}'".format(sin))
 				# check if the person exists in people
 				if not curs.fetchone():
 					print("Person does not exist.")
 					# if the person does not exist
 					# ask user if to add new one or not
-					ch = input("Would you like to register a new buyer? y/n \n")
+					ch = input("Would you like to register a new person? y/n \n")
 					if ch == 'y':
 						# register a new person into people database
-						regPerson(conString, curs)
+						regPerson(conString, curs,sin)
 					if ch == 'n':
 						print("See you next time!")
 						return
 				
 				# check if the driver has already got a licence
 				# if so, raise error value
-				curs.execute("SELECT sin FROM drive_licence WHERE sin = {}".format(sin))
+				curs.execute("SELECT sin FROM drive_licence WHERE sin = '{}'".format(sin))
 				if curs.fetchone():
 					print("Driver already registered.")
 					checking = True
@@ -109,28 +109,43 @@ def DriverLiRegis(conString):
 			else:
 				ongoing  = True
 
-def regPerson(conString, curs):
+def regPerson(conString, curs, sin):
 	run =True
 	while(run):
-		#sin, name, height,weight,eyecolor, haircolor,addr,gender,birthday
-		sin = input("Enter sin number: ").lower()
-		name = input("Enter Name: ").lower()
-		height =  input("Height: ").lower()
-		weight = input("Weight :").lower()
-		eyeColor = input("Eye Colour: ").lower()
-		hairColor = input("Hair Colour: ").lower()
-		addr = input("Address: ").lower()
-		gender = input("Gender (m/f): ").lower()
-		birthday = input("Birthdate (YYYY-MM-DD): ")
+		verify = False
+		while(not verify):
+			#sin = input("Enter sin number: ").lower()
+			name = input("Enter Name: ").lower()
+			height =  input("Height: ").lower()
+			weight = input("Weight :").lower()
+			eyeColor = input("Eye Colour: ").lower()
+			hairColor = input("Hair Colour: ").lower()
+			addr = input("Address: ").lower()
+			gender = input("Gender (m/f): ").lower()
+			birthday = input("Birthdate (YYYY-MM-DD): ")
+	        
+			verify = (sin.isalnum() and name.isalpha() and height.isdigit() and weight.isdigit() and eyeColor.isalpha() and hairColor.isalpha() and addr.isalnum() and (gender == 'm' or gender =='f'))      
+			
+			if(not verify):
+				print("\nError in entry, please ensure all data is correct")
+				print("Sin #: "+sin+" "+ str(sin.isalnum()))
+				print("Name: "+name + " " + str(name.isalpha()))
+				print("Height#: "+ height + " " + str(height.isdigit()))
+				print(" Weight: " + weight+ " " + str(weight.isdigit()))
+				print(" Eye Color: " +eyeColor + " "+ str(eyeColor.isalpha()))
+				print("Hair Color: " + hairColor+" " + str(hairColor.isalpha()))
+				print("Address: " + addr + str(addr.isalnum()))
+				print("Gender: " + gender + str(gender == 'm' or gender =='f'))
+				print("Birthday: " + birthday + "\n")
 	
 		statement = "insert into people values('"+sin+"','"+name+"',"+height+","+weight+", '"+eyeColor+"', '"+hairColor+"', '"+addr+"','"+gender+"',to_date('"+birthday+"','YYYY-MM-DD') )"
-		try:
-			curs.execute(statement)
-			run=False
-		except:
-			cont = input("SQL Error, retry? Y/N").lower()
-			if(cont != 'y'):
-				run = False
+		#try:
+		curs.execute(statement)
+		run=False
+		#except:
+		#	cont = input("SQL Error, retry? Y/N").lower()
+		#	if(cont != 'y'):
+		#		run = False
 				
 		
 				

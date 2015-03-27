@@ -82,7 +82,7 @@ def AutoTransaction(conString):
 					ch = input("Would you like to register a new buyer? y/n \n")
 					if ch == 'y':
 						# register a new person into people database
-						P3.regPerson(conString, curs)
+						P3.regPerson(conString, curs,buyer_id[0])
 					if ch == 'n':
 						print("See you next time!")
 						return
@@ -129,7 +129,7 @@ def AutoTransaction(conString):
 			while(checking):
 				checking = False
 				try:		
-					price = input("Price:")
+					price = float(input("Price:"))
 				except ValueError:
 					print("Invalid input!")
 					checking = True
@@ -144,7 +144,7 @@ def AutoTransaction(conString):
 			#curs.bindarraysize = 1
 			#curs.setinputsizes(int, 15, 15, 15, date, float)
 
-			statement = "INSERT INTO auto_sale VALUES ({}, {}, {}, {}, TO_DATE({},'YYYY-MM-DD'), {})"\
+			statement = "INSERT INTO auto_sale VALUES ('{}', '{}', '{}', '{}', TO_DATE({},'YYYY-MM-DD'), {})"\
 						.format(transaction_id, seller_id, buyer_id[0], vehicle_id, s_date, price) 
 			curs.execute(statement)
 			

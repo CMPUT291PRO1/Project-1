@@ -61,7 +61,7 @@ def regV(conString):
             primary = input("Is primary owner? (y/n): ").lower()
             if(not(searchSin(ownerId, curs))):
                 print("Person not found")
-                P3.regPerson(conString, curs)
+                P3.regPerson(conString, curs, ownerId)
                 
             if(primary=="y"):
                 primaryOwner.append(ownerId)
