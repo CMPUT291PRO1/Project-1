@@ -2,6 +2,7 @@ import sys
 import cx_Oracle
 import time
 import random
+import string
 
 # for testing---------------------------------------------
 #def DriverLiRegis():
@@ -42,7 +43,7 @@ def DriverLiRegis(conString):
 			while(checking):
 				checking = False
 				l_num = input("Your licence number is: (15 digits) ")
-				curs.execute("SELECT licence_no FROM drive_licence WHERE licence_no = '{}'".format(l_num))
+				curs.execute("SELECT licence_no FROM drive_licence WHERE lower(licence_no) = '{}'".format(str.lower(l_num)))
 				if curs.fetchone():
 					print("Licence exists.")
 					checking = True
@@ -53,7 +54,7 @@ def DriverLiRegis(conString):
 				sin = input("Please enter your SIN:")
 				#if sin.isalnum() or sin.isalalpha():
 				#	checking = True
-				curs.execute("SELECT sin FROM people where sin = '{}'".format(sin))
+				curs.execute("SELECT sin FROM people where lower(sin) = '{}'".format(str.lower(sin)))
 				# check if the person exists in people
 				if not curs.fetchone():
 					print("Person does not exist.")
@@ -69,7 +70,7 @@ def DriverLiRegis(conString):
 				
 				# check if the driver has already got a licence
 				# if so, raise error value
-				curs.execute("SELECT sin FROM drive_licence WHERE sin = '{}'".format(sin))
+				curs.execute("SELECT sin FROM drive_licence WHERE lower(sin) = '{}'".format(str.lower(sin)))
 				if curs.fetchone():
 					print("Driver already registered.")
 					checking = True
