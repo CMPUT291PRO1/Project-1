@@ -140,13 +140,13 @@ def regPerson(conString, curs, sin):
 				print("Birthday: " + birthday + "\n")
 	
 		statement = "insert into people values('"+sin+"','"+name+"',"+height+","+weight+", '"+eyeColor+"', '"+hairColor+"', '"+addr+"','"+gender+"',to_date('"+birthday+"','YYYY-MM-DD') )"
-		#try:
-		curs.execute(statement)
-		run=False
-		#except:
-		#	cont = input("SQL Error, retry? Y/N").lower()
-		#	if(cont != 'y'):
-		#		run = False
+		try:
+			curs.execute(statement)
+			run=False
+		except:
+			cont = input("SQL Error, retry? Y/N").lower()
+			if(cont != 'y'):
+				run = False
 				
 		
 				
