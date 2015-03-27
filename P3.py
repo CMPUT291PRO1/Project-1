@@ -1,6 +1,7 @@
 import sys
 import cx_Oracle
 import time
+import random
 
 # for testing---------------------------------------------
 #def DriverLiRegis():
@@ -31,18 +32,27 @@ def DriverLiRegis(conString):
 			# connecting to database
 			con = cx_Oracle.connect(conString);
 			curs=con.cursor();	
-		        
+			"""   
 			# generate a random num that does not exist in database
-			print("Generating your licence number...")
-			curs.execute("SELECT MAX(licence_no) FROM drive_licence")			
-			largest = curs.fetchone()
-			l_num = int(largest[0]) + 1 
+			print("Generating your licence number...")			
+			l_num = ''.join(random.choice('ABCDEF') for i in range(3))+'-'+''.join(str(random.randint(1,9)) for i in range(4))
 			print("Your licence number is: {}".format(l_num))
+			"""
+			checking = True
+			while(checking):
+				checking = False
+				l_num = input("Your licence number is: (15 digits) ")
+				curs.execute("SELECT licence_no FROM drive_licence WHERE licence_no = '{}'".format(l_num))
+				if curs.fetchone():
+					print("Licence exists.")
+					checking = True
 			
 			checking = True
 			while(checking):
 				checking = False
 				sin = input("Please enter your SIN:")
+				if sin.isalnum() or sin.isalalpha():
+					checking = True
 				curs.execute("SELECT sin FROM people where sin = {}".format(sin))
 				# check if the person exists in people
 				if not curs.fetchone():
@@ -102,36 +112,16 @@ def DriverLiRegis(conString):
 def regPerson(conString, curs):
 	run =True
 	while(run):
-		
-		
 		#sin, name, height,weight,eyecolor, haircolor,addr,gender,birthday
-		
-		
-		verify = False
-		while(not verify):
-			sin = input("Enter sin number: ").lower()
-			name = input("Enter Name: ").lower()
-			height =  input("Height: ").lower()
-			weight = input("Weight :").lower()
-			eyeColor = input("Eye Colour: ").lower()
-			hairColor = input("Hair Colour: ").lower()
-			addr = input("Address: ").lower()
-			gender = input("Gender (m/f): ").lower()
-			birthday = input("Birthdate (YYYY-MM-DD): ")
-	        
-			verify = (sin.isalnum() and name.isalpha() and height.isdigit() and weight.isdigit() and eyeColor.isalpha() and hairColor.isalpha() and addr.isalnum() and (gender == 'm' or gender =='f'))      
-			
-			if(not verify):
-				print("\nError in entry, please ensure all data is correct")
-				print("Sin #: "+sin+" "+ str(sin.isalnum()))
-				print("Name: "+name + " " + str(name.isalpha()))
-				print("Height#: "+ hieght + " " + str(height.isdigit()))
-				print(" Weight: " + weight+ " " + str(weight.isdigit()))
-				print(" Eye Color: " +eyeColor + " "+ str(eyeColor.isalpha()))
-				print("Hair Color: " + hairColor+" " + str(hairColor.isalpha()))
-				print("Address: " + addr + str(addr.isalnum()))
-				print("Gender: " + gender + str(gender == 'm' or gender =='f'))
-				print("Birthday: " + birthday + "\n")
+		sin = input("Enter sin number: ").lower()
+		name = input("Enter Name: ").lower()
+		height =  input("Height: ").lower()
+		weight = input("Weight :").lower()
+		eyeColor = input("Eye Colour: ").lower()
+		hairColor = input("Hair Colour: ").lower()
+		addr = input("Address: ").lower()
+		gender = input("Gender (m/f): ").lower()
+		birthday = input("Birthdate (YYYY-MM-DD): ")
 	
 		statement = "insert into people values('"+sin+"','"+name+"',"+height+","+weight+", '"+eyeColor+"', '"+hairColor+"', '"+addr+"','"+gender+"',to_date('"+birthday+"','YYYY-MM-DD') )"
 		try:
